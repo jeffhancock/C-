@@ -6,8 +6,8 @@
 // Copyright   : Carte blanche.  Plagiarize at will.
 // Description : A solution to a programming problem asked in a phone interview.
 //               In the interview, I was asked to verbally describe how I would
-//				 solve the problem of validating a potential solution to a
-//				 Sudoku puzzle.  As an exercise, I later implemented it in C++.
+//               solve the problem of validating a potential solution to a
+//               Sudoku puzzle.  As an exercise, I later implemented it in C++.
 //============================================================================
 
 #include <iostream>
