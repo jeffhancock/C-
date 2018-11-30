@@ -27,7 +27,23 @@ public:
 
     // Constructor taking a filename of a CSV file, with nine lines of ints,
     // nine per line, each line representing a row of the puzzle board.
-    SudokuPuzzle(const string &fn);
+    SudokuPuzzle(const string& fn);
+
+    // Copy constructor.  Not actually needed for this program to work, but
+    // included for completeness.
+    SudokuPuzzle(const SudokuPuzzle& from);
+
+    // Copy assignment operator.  Not actually needed for this program to work, but
+    // included for completeness.
+    SudokuPuzzle& operator=(const SudokuPuzzle& from);
+
+    // Move constructor.  Not actually needed for this program to work, but
+    // included for completeness.
+    SudokuPuzzle(SudokuPuzzle&& from);
+
+    // Move assignment operator.  Not actually needed for this program to work, but
+    // included for completeness.
+    SudokuPuzzle& operator=(SudokuPuzzle&& from);
 
     ~SudokuPuzzle();
 
@@ -152,6 +168,104 @@ SudokuPuzzle::SudokuPuzzle(const string &fn) {
     }
 
     print(); // for debug...
+}
+
+// Copy constructor
+SudokuPuzzle::SudokuPuzzle(const SudokuPuzzle& from) {
+    // Copy board values and possibilities
+    for (int row=0; row < 9; row++) {
+        for (int col=0; col < 9; col++) {
+            // Copy board value for this space
+            board[row][col] = from.board[row][col];
+
+            if (from.possibilities[row][col] == nullptr)
+                possibilities[row][col] = nullptr;
+            else {
+                // Create a new set and add all the possible values to it
+                possibilities[row][col] = new set<int>;
+                for (set<int>::iterator it = from.possibilities[minRow][minCol]->begin(); it != from.possibilities[minRow][minCol]->end(); it++) {
+                    possibilities[row][col]->insert(*it);
+                }
+            }
+        }
+    }
+
+    // Copy trivial values
+    minPossibilities = from.minPossibilities;
+    minRow = from.minRow;
+    minCol = from.minCol;
+    verbose = from.verbose;
+}
+
+// Copy assignment
+SudokuPuzzle& SudokuPuzzle::operator=(const SudokuPuzzle& from) {
+    // Copy board values and possibilities
+    for (int row=0; row < 9; row++) {
+        for (int col=0; col < 9; col++) {
+            // Copy board value for this space
+            board[row][col] = from.board[row][col];
+
+            // Delete the old possibilities
+            delete possibilities[row][col];
+
+            if (from.possibilities[row][col] == nullptr)
+                possibilities[row][col] = nullptr;
+            else {
+                // Create a new set and add all the possible values to it
+                possibilities[row][col] = new set<int>;
+                for (set<int>::iterator it = from.possibilities[minRow][minCol]->begin(); it != from.possibilities[minRow][minCol]->end(); it++) {
+                    possibilities[row][col]->insert(*it);
+                }
+            }
+        }
+    }
+
+    // Copy trivial values
+    minPossibilities = from.minPossibilities;
+    minRow = from.minRow;
+    minCol = from.minCol;
+    verbose = from.verbose;
+
+    return *this;
+}
+
+// Move constructor
+SudokuPuzzle::SudokuPuzzle(SudokuPuzzle&& from)
+    :minPossibilities{from.minPossibilities},
+     minRow{from.minRow},
+     minCol{from.minCol},
+     verbose{from.verbose} {
+         // Copy board values and possibilities
+         for (int row=0; row < 9; row++) {
+             for (int col=0; col < 9; col++) {
+                 // Copy board value for this space
+                 board[row][col] = from.board[row][col];
+                 possibilities[row][col] = from.possibilities[row][col];
+                 from.possibilities[row][col] = nullptr;
+             }
+         }
+}
+
+// Move assignment operator.
+SudokuPuzzle& SudokuPuzzle::operator=(SudokuPuzzle&& from) {
+    // Copy board values and possibilities
+    for (int row=0; row < 9; row++) {
+        for (int col=0; col < 9; col++) {
+            // Delete the old possibilities
+            delete possibilities[row][col];
+
+            // Copy board value for this space
+            board[row][col] = from.board[row][col];
+            possibilities[row][col] = from.possibilities[row][col];
+            from.possibilities[row][col] = nullptr;
+        }
+    }
+    // Copy trivial values
+    minPossibilities = from.minPossibilities;
+    minRow = from.minRow;
+    minCol = from.minCol;
+    verbose = from.verbose;
+    return *this;
 }
 
 bool SudokuPuzzle::solve(const bool verbose) {
@@ -557,6 +671,28 @@ int main() {
         cout << "So far hardPuzzle is " << (sp.isSolutionValid() ? "" : "NOT ") << "valid." << endl;
         sp.solve();
         cout << "Computed solution to hardPuzzle is " << (sp.isSolutionValid() ? "" : "NOT ") << "valid." << endl;
+    }
+
+    {
+        SudokuPuzzle sp("UnitedSudoku1.txt");
+        cout << "So far UnitedSudoku1 is " << (sp.isSolutionValid() ? "" : "NOT ") << "valid." << endl;
+        sp.solve();
+        cout << "Computed solution to UnitedSudoku1 is " << (sp.isSolutionValid() ? "" : "NOT ") << "valid." << endl;
+    }
+
+    {
+        SudokuPuzzle sp("UnitedSudoku2.txt");
+        cout << "So far UnitedSudoku2 is " << (sp.isSolutionValid() ? "" : "NOT ") << "valid." << endl;
+        sp.solve();
+        cout << "Computed solution to UnitedSudoku2 is " << (sp.isSolutionValid() ? "" : "NOT ") << "valid." << endl;
+    }
+
+    {
+        string fn = "DavesHardPuzzle.txt";
+        SudokuPuzzle sp(fn);
+        cout << "So far " << fn << " is " << (sp.isSolutionValid() ? "" : "NOT ") << "valid." << endl;
+        sp.solve(true);
+        cout << "Computed solution to " << fn << " is " << (sp.isSolutionValid() ? "" : "NOT ") << "valid." << endl;
     }
 
     return 0;
